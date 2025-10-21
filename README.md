@@ -26,7 +26,7 @@ FIDO is a Python application that automatically cleans your Gmail inbox by:
 
 - [x] Project structure
 - [x] Python environment setup
-- [ ] Gmail API integration
+- [x] Gmail API integration
 - [ ] Grep engine
 - [ ] Docker container
 - [ ] Kubernetes deployment
