@@ -222,12 +222,61 @@ class GmailClient:
             # Call Gmail API to delete the message 
             # This will move it to trash first, then it gets deleted
             self.service.users().messages().delete(
-                userId='me'
+                userId='me',
                 id=message_id
             ).execute()
+
+            # If we get here, IT WORKED! DOPE!
+            print(f"Deleted email: {message_id}:")
+            return True
+
+        except HttpError as error:
+            print(f"Error in deleting email {message_id}:")
+            return False
+
+    def archive_email(self, message_id: str) -> bool:
+        """
+        Archive an email message (remove from inbox, but do not delete)
+
+        Args:   
+            message_id: The ID of the message to archive
+
+        Returns: 
+            True if successful, False if there was an error
+        """
+        try:
+            # Archiving = removing the INBOX label
+            # We "modify" the message by removing labels
+            self.service.users().messages().modify(
+                userId='me',
+                id=message_id,
+                body={'removeLabelIds': ['INBOX']}
+            ).execute()
+
+        except HttpError as error: 
+            print(f"Archived email: {message_id}")
+            return False
 
 # Test code - only runs when you execute this file directly
 if __name__ == '__main__':
     print("Testing Gmail Client...")
     client = GmailClient()
     print("Authentication successful!")
+
+    # Test 1: Search for emails 
+    print("\n--- Test 1: Search for unread emails ---")
+    emails = client.search_emails("is:unread", max_results=5)
+    print(f"Found {len(emails)} unread emails")
+
+    # Test 2: Get details of firt email (if any exist)
+    if emails:
+        print("\n-- Test 2: Get email details ---")
+        first_email_id = emails[0]['id']
+        details = client.get_email_details(first_email_id)
+        if details:
+            print(f"Subject: {details['subject']}")
+            print(f"From: {details['from']}")
+            print(f"Date: {details['date']}")
+            print(f"Body preview: {details['body'][:100]}...")  #First ten results
+        else:
+            print("\nNo emails found to test with!")
